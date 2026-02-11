@@ -9,10 +9,20 @@ import { ENTITY } from './game.js';
 
 const BRIGHTNESS = {
     EMPTY: 0,
-    WALL: 3,
-    DOT: 1,
-    POWER: 2,
-    ENTITY: 4
+    WALL: 0, // Using negative space for walls for better contrast? Or 1? Let's try 1 for Retro Green monitor look.
+    // Actually, on GitHub, empty is background color. 
+    // If we want the maze to look "lit", we should maybe make walls 0 and paths 1? 
+    // Or Walls 1 and Paths 0?
+    // Classic Pacman: Black bg, Blue walls.
+    // GitHub: White/Dark bg, Green pixels.
+    // Let's make Walls = 2 (visible), Paths = 0 (empty), Dots = 1, Pacman/Ghost = 4.
+    // Wait, typically paths are black, dots are white.
+    // Let's try:
+    // Background (Path/Empty): 0
+    // Wall: 1
+    // Dot: 2
+    // Power: 3
+    // Ghost/Pacman: 4
 };
 
 export function renderFrame(game) {

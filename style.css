@@ -1,0 +1,175 @@
+:root {
+    --color-canvas-default: #0d1117;
+    --color-canvas-subtle: #161b22;
+    --color-border-default: #30363d;
+    --color-border-muted: #21262d;
+    --color-fg-default: #c9d1d9;
+    --color-fg-muted: #8b949e;
+    --color-accent-fg: #58a6ff;
+    --color-btn-bg: #21262d;
+    --color-btn-border: #30363d;
+    --color-btn-hover-bg: #30363d;
+    
+    /* Contribution Graph Colors - Dark Mode */
+    --color-calendar-graph-day-bg: #161b22;
+    --color-calendar-graph-day-L1-bg: #0e4429;
+    --color-calendar-graph-day-L2-bg: #006d32;
+    --color-calendar-graph-day-L3-bg: #26a641;
+    --color-calendar-graph-day-L4-bg: #39d353;
+}
+
+body {
+    background-color: var(--color-canvas-default);
+    color: var(--color-fg-default);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+a { color: var(--color-accent-fg); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.header {
+    background-color: #161b22;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border-muted);
+}
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.header input {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 5px 12px;
+    color: white;
+    width: 260px;
+}
+.nav a {
+    color: white;
+    font-weight: 600;
+    margin-right: 16px;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+.main-content {
+    display: flex;
+    margin-top: 24px;
+    gap: 24px;
+}
+
+/* Sidebar */
+.sidebar { width: 296px; flex-shrink: 0; }
+.avatar {
+    width: 296px;
+    height: 296px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-muted);
+}
+.vcard-names { margin-top: 16px; }
+.vcard-fullname { display: block; font-size: 24px; font-weight: 600; line-height: 1.25; }
+.vcard-username { display: block; font-size: 20px; font-weight: 300; line-height: 24px; color: var(--color-fg-muted); }
+.btn-block { width: 100%; margin-top: 16px; }
+.vcard-details { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--color-border-muted); }
+.detail-item { display: flex; align-items: center; gap: 8px; color: var(--color-fg-default); }
+.detail-item svg { fill: var(--color-fg-muted); }
+
+/* Content */
+.content { flex-grow: 1; }
+.pinned-items h6 { margin: 0 0 8px; color: var(--color-fg-default); font-weight: 400; }
+.pinned-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.pinned-item {
+    border: 1px solid var(--color-border-default);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--color-canvas-default);
+}
+.pinned-header { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--color-accent-fg); }
+.pinned-desc { color: var(--color-fg-muted); font-size: 12px; margin-top: 8px; margin-bottom: 16px; }
+.pinned-meta { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-fg-muted); }
+.lang-color { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+/* Contribution Graph */
+.contribution-section {
+    border: 1px solid var(--color-border-default);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--color-canvas-default);
+    margin-bottom: 24px;
+}
+.contrib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.graph-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center visuals specifically */
+}
+.months {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 720px;
+    margin-left: 30px; /* Offset for days labels */
+    font-size: 12px;
+    color: var(--color-fg-muted);
+}
+.graph-body { display: flex; gap: 4px; }
+.days {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--color-fg-muted);
+    padding-top: 10px;
+    height: 80px; /* Approx height */
+}
+
+.graph-grid {
+    display: grid;
+    /* 53 weeks, 7 days */
+    grid-template-columns: repeat(53, 10px); 
+    grid-template-rows: repeat(7, 10px);
+    gap: 3px;
+}
+
+.pixel {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background-color: var(--color-calendar-graph-day-bg);
+}
+
+.pixel.level-1 { background-color: var(--color-calendar-graph-day-L1-bg); }
+.pixel.level-2 { background-color: var(--color-calendar-graph-day-L2-bg); }
+.pixel.level-3 { background-color: var(--color-calendar-graph-day-L3-bg); }
+.pixel.level-4 { background-color: var(--color-calendar-graph-day-L4-bg); }
+
+.legend { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-fg-muted); margin-top: 8px; justify-content: flex-end; width: 100%; }
+.legend-cell { width: 10px; height: 10px; border-radius: 2px; }
+.legend-cell.level-0 { background-color: var(--color-calendar-graph-day-bg); }
+.legend-cell.level-1 { background-color: var(--color-calendar-graph-day-L1-bg); }
+.legend-cell.level-2 { background-color: var(--color-calendar-graph-day-L2-bg); }
+.legend-cell.level-3 { background-color: var(--color-calendar-graph-day-L3-bg); }
+.legend-cell.level-4 { background-color: var(--color-calendar-graph-day-L4-bg); }
+
+.controls { margin-top: 16px; display: flex; gap: 16px; align-items: center; }
+
+/* Buttons */
+.btn {
+    background-color: var(--color-btn-bg);
+    border: 1px solid var(--color-btn-border);
+    color: var(--color-fg-default);
+    padding: 5px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+}
+.btn:hover { background-color: var(--color-btn-hover-bg); }
