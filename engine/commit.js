@@ -4,10 +4,10 @@ const path = require('path');
 // Brightness to Commit Count Mapping
 const COMMIT_COUNTS = {
     0: 0,
-    1: 1,
-    2: 4,
-    3: 7,
-    4: 15 // Ensure max darkness
+    1: 3,   // Level 1: Light (1-3)
+    2: 7,   // Level 2: Medium (4-9)
+    3: 15,  // Level 3: Dark (10-19)
+    4: 30   // Level 4: Max (20+)
 };
 
 function generateCommitScript(pixels) {

@@ -38,23 +38,23 @@ function renderFrame(game) {
 
             // Base Map
             if (cell === ENTITY.WALL) {
-                brightness = 1;
+                brightness = 3; // Wall - Dark Green 
             } else if (cell === ENTITY.DOT) {
-                brightness = 2;
+                brightness = 1; // Dot - Light Green
             } else if (cell === ENTITY.POWER_PILLET) {
-                brightness = 3;
+                brightness = 2; // Power - Medium Green
             } else {
                 brightness = 0; // Empty path
             }
 
             // Entities overlap
             if (pacman.x === x && pacman.y === y) {
-                brightness = 4;
+                brightness = 4; // Max brightness
             }
 
             ghosts.forEach(g => {
                 if (g.x === x && g.y === y) {
-                    brightness = 4; // Or 3 if we want distinction? 4 is max.
+                    brightness = 4; // Max brightness
                 }
             });
 
