@@ -1,0 +1,14 @@
+{
+  "name": "github-pacman",
+  "version": "1.0.0",
+  "description": "Pac-Man game engine for GitHub contribution graph",
+  "main": "engine/index.js",
+  "scripts": {
+    "start": "node engine/index.js",
+    "test": "node engine/index.js --dry-run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}
