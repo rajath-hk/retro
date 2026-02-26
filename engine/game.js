@@ -24,9 +24,10 @@ function speedForLevel(level) {
 }
 
 export class Game {
-  constructor(boardConfig, state = null) {
+  constructor(boardConfig, state = null, options = {}) {
     this.width = boardConfig.width;
     this.height = boardConfig.height;
+    this.wrapAroundDefault = Boolean(options.wrapAround);
 
     if (state) {
       this.state = state;
@@ -48,6 +49,7 @@ export class Game {
     this.state.foodsEaten ??= 0;
     this.state.level ??= 1;
     this.state.speedMs ??= speedForLevel(this.state.level);
+    this.state.wrapAround ??= this.wrapAroundDefault;
   }
 
   initNewGame() {
@@ -69,7 +71,8 @@ export class Game {
       food: null,
       foodsEaten: 0,
       level: 1,
-      speedMs: speedForLevel(1)
+      speedMs: speedForLevel(1),
+      wrapAround: this.wrapAroundDefault
     };
 
     this.spawnFood();
@@ -85,7 +88,12 @@ export class Game {
     const [dx, dy] = DIRECTIONS[this.state.dir];
     const nextHead = { x: head.x + dx, y: head.y + dy };
 
-    if (!this.isInsideBoard(nextHead.x, nextHead.y)) {
+    if (this.state.wrapAround) {
+      nextHead.x = (nextHead.x + this.width) % this.width;
+      nextHead.y = (nextHead.y + this.height) % this.height;
+    }
+
+    if (!this.state.wrapAround && !this.isInsideBoard(nextHead.x, nextHead.y)) {
       this.state.gameOver = true;
       this.state.win = false;
       return;
@@ -159,6 +167,10 @@ export class Game {
     if (isReverse && this.state.snake.length > 1) return;
 
     this.state.intendedDir = dir;
+  }
+
+  setWrapAround(enabled) {
+    this.state.wrapAround = Boolean(enabled);
   }
 
   getState() {

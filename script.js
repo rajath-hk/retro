@@ -10,6 +10,7 @@ let isPlaying = false;
 let isPaused = false;
 let currentSpeedMs = 200;
 let highScore = 0;
+let wrapAroundEnabled = localStorage.getItem('snake-wrap-mode') === '1';
 
 let audioContext = null;
 
@@ -57,6 +58,7 @@ const speedEl = document.getElementById('speed-display');
 const highScoreEl = document.getElementById('high-score-display');
 const statusEl = document.getElementById('status-display');
 const gameAreaEl = document.getElementById('game-area');
+const wrapToggleEl = document.getElementById('wrap-toggle');
 
 function initGrid() {
   gridEl.innerHTML = '';
@@ -174,7 +176,7 @@ function pauseGame() {
 
 function resetGame() {
   stopGame();
-  game = new Game({ width: COLS, height: ROWS });
+  game = new Game({ width: COLS, height: ROWS }, null, { wrapAround: wrapAroundEnabled });
   updateDisplay();
 }
 
@@ -281,12 +283,23 @@ function setupControls() {
 
   pauseBtn.addEventListener('click', pauseGame);
   resetBtn.addEventListener('click', resetGame);
+  if (wrapToggleEl) {
+    wrapToggleEl.checked = wrapAroundEnabled;
+    wrapToggleEl.addEventListener('change', () => {
+      wrapAroundEnabled = wrapToggleEl.checked;
+      localStorage.setItem('snake-wrap-mode', wrapAroundEnabled ? '1' : '0');
+      if (game) {
+        game.setWrapAround(wrapAroundEnabled);
+        updateDisplay();
+      }
+    });
+  }
   setupTouchControls();
 }
 
 function init() {
   initGrid();
-  game = new Game({ width: COLS, height: ROWS });
+  game = new Game({ width: COLS, height: ROWS }, null, { wrapAround: wrapAroundEnabled });
 
   highScore = parseInt(localStorage.getItem('snake-high-score') || '0', 10) || 0;
   highScoreEl.innerText = `High Score: ${highScore}`;

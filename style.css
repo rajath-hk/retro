@@ -84,6 +84,23 @@ body {
     background-color: var(--color-btn-hover-bg);
 }
 
+.toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-fg-muted);
+    font-size: 12px;
+    padding: 4px 9px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 999px;
+    background: var(--color-canvas-default);
+    user-select: none;
+}
+
+.toggle-wrap input {
+    accent-color: #3fb950;
+}
+
 .graph-container {
     margin-top: 16px;
     padding: 14px;

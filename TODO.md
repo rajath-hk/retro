@@ -12,7 +12,7 @@
 
 ## Next
 - [ ] Add obstacle mode
-- [ ] Add wraparound mode toggle
+- [x] Add wraparound mode toggle
 - [ ] Add countdown before game start
 - [ ] Add game over modal instead of alerts
 - [ ] Add unit tests for movement and collision
