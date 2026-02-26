@@ -56,6 +56,7 @@ const levelEl = document.getElementById('level-display');
 const speedEl = document.getElementById('speed-display');
 const highScoreEl = document.getElementById('high-score-display');
 const statusEl = document.getElementById('status-display');
+const gameAreaEl = document.getElementById('game-area');
 
 function initGrid() {
   gridEl.innerHTML = '';
@@ -96,7 +97,15 @@ function updateDisplay() {
   levelEl.innerText = `Level: ${game.state.level}`;
   speedEl.innerText = `Speed: ${game.state.speedMs}ms`;
   if (statusEl) {
-    statusEl.innerText = game.state.gameOver ? (game.state.win ? 'Status: You Win' : 'Status: Game Over') : (isPaused ? 'Status: Paused' : 'Status: Running');
+    if (game.state.gameOver) {
+      statusEl.innerText = game.state.win ? 'Status: You Win' : 'Status: Game Over';
+    } else if (!isPlaying) {
+      statusEl.innerText = 'Status: Ready';
+    } else if (isPaused) {
+      statusEl.innerText = 'Status: Paused';
+    } else {
+      statusEl.innerText = 'Status: Running';
+    }
   }
 }
 
@@ -169,6 +178,57 @@ function resetGame() {
   updateDisplay();
 }
 
+function applyDirection(dir) {
+  if (!game) return;
+  game.setIntendedDir(dir);
+  if (!isPlaying && !game.state.gameOver) {
+    startGame();
+  }
+}
+
+function setupTouchControls() {
+  if (!gameAreaEl) return;
+
+  let startX = 0;
+  let startY = 0;
+  let hasTouch = false;
+  const swipeThreshold = 20;
+
+  gameAreaEl.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    hasTouch = true;
+  }, { passive: true });
+
+  gameAreaEl.addEventListener('touchmove', (e) => {
+    if (!hasTouch) return;
+    e.preventDefault();
+  }, { passive: false });
+
+  gameAreaEl.addEventListener('touchend', (e) => {
+    if (!hasTouch || e.changedTouches.length === 0) return;
+    hasTouch = false;
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (Math.max(absX, absY) < swipeThreshold) return;
+
+    if (absX > absY) {
+      applyDirection(deltaX > 0 ? 'RIGHT' : 'LEFT');
+    } else {
+      applyDirection(deltaY > 0 ? 'DOWN' : 'UP');
+    }
+
+    e.preventDefault();
+  }, { passive: false });
+}
+
 function setupControls() {
   document.addEventListener('keydown', (e) => {
     if (!game) return;
@@ -204,7 +264,7 @@ function setupControls() {
         return;
     }
 
-    game.setIntendedDir(dir);
+    applyDirection(dir);
     e.preventDefault();
   });
 
@@ -221,6 +281,7 @@ function setupControls() {
 
   pauseBtn.addEventListener('click', pauseGame);
   resetBtn.addEventListener('click', resetGame);
+  setupTouchControls();
 }
 
 function init() {
