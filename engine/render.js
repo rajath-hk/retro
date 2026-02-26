@@ -33,6 +33,8 @@ export function renderFrame(game) {
                 brightness = 1; // Dot - Light Green
             } else if (cell === ENTITY.POWER_PILLET) {
                 brightness = 2; // Power - Medium Green
+            } else if (cell === ENTITY.FRUIT) {
+                brightness = 4; // Fruit - Bright Green
             } else {
                 brightness = 0; // Empty path
             }
