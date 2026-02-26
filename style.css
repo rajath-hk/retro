@@ -12,10 +12,10 @@
     
     /* Contribution Graph Colors - Dark Mode */
     --color-calendar-graph-day-bg: #161b22;
-    --color-calendar-graph-day-L1-bg: #0e4429;
-    --color-calendar-graph-day-L2-bg: #006d32;
-    --color-calendar-graph-day-L3-bg: #26a641;
-    --color-calendar-graph-day-L4-bg: #39d353;
+    --color-calendar-graph-day-L1-bg: #30363d;
+    --color-calendar-graph-day-L2-bg: #f85149;
+    --color-calendar-graph-day-L3-bg: #2ea043;
+    --color-calendar-graph-day-L4-bg: #3fb950;
 }
 
 body {
@@ -160,6 +160,14 @@ a:hover { text-decoration: underline; }
 .legend-cell.level-4 { background-color: var(--color-calendar-graph-day-L4-bg); }
 
 .controls { margin-top: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.controls span {
+    color: var(--color-fg-muted);
+    font-size: 12px;
+    padding: 3px 8px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 999px;
+    background: var(--color-canvas-subtle);
+}
 
 .instructions { margin-top: 16px; padding: 16px; border: 1px solid var(--color-border-default); border-radius: 6px; background: var(--color-canvas-default); }
 .instructions h3 { margin: 0 0 8px; color: var(--color-fg-default); }

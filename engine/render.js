@@ -1,58 +1,29 @@
 import { ENTITY } from './game.js';
 
-// Brightness Levels
-// 0: Empty/Wall-Negative
-// 1: Wall/Path (Low)
-// 2: Dot (Medium)
-// 3: Power (Medium-High)
-// 4: Actor (High)
-
-const BRIGHTNESS = {
-    EMPTY: 0,
-    WALL: 3,
-    DOT: 1,
-    POWER: 2,
-    ENTITY: 4
+const LEVEL = {
+  EMPTY: 0,
+  FOOD: 2,
+  BODY: 3,
+  HEAD: 4
 };
 
 export function renderFrame(game) {
-    const layout = game.layout;
-    const { pacman, ghosts } = game.state;
-    const pixels = [];
+  const pixels = [];
 
-    for (let y = 0; y < game.height; y++) {
-        const row = [];
-        for (let x = 0; x < game.width; x++) {
-            let brightness = 0;
-            const cell = layout[y][x];
+  for (let y = 0; y < game.height; y++) {
+    pixels.push(new Array(game.width).fill(LEVEL.EMPTY));
+  }
 
-            // Base Map
-            if (cell === ENTITY.WALL) {
-                brightness = 3; // Wall - Dark Green 
-            } else if (cell === ENTITY.DOT) {
-                brightness = 1; // Dot - Light Green
-            } else if (cell === ENTITY.POWER_PILLET) {
-                brightness = 2; // Power - Medium Green
-            } else if (cell === ENTITY.FRUIT) {
-                brightness = 4; // Fruit - Bright Green
-            } else {
-                brightness = 0; // Empty path
-            }
+  const { snake, food } = game.state;
 
-            // Entities overlap
-            if (pacman.x === x && pacman.y === y) {
-                brightness = 4; // Max brightness
-            }
+  if (food && food.y >= 0 && food.y < game.height && food.x >= 0 && food.x < game.width) {
+    pixels[food.y][food.x] = LEVEL.FOOD;
+  }
 
-            ghosts.forEach(g => {
-                if (g.x === x && g.y === y) {
-                    brightness = 4; // Max brightness
-                }
-            });
+  snake.forEach((segment, index) => {
+    if (segment.y < 0 || segment.y >= game.height || segment.x < 0 || segment.x >= game.width) return;
+    pixels[segment.y][segment.x] = index === 0 ? LEVEL.HEAD : LEVEL.BODY;
+  });
 
-            row.push(brightness);
-        }
-        pixels.push(row);
-    }
-    return pixels;
+  return pixels;
 }

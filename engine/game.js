@@ -1,16 +1,10 @@
-
-// Entity Types
 export const ENTITY = {
   EMPTY: 0,
-  WALL: 1,
-  DOT: 2,
-  POWER_PILLET: 3,
-  PACMAN: 4,
-  GHOST: 5,
-  FRUIT: 6
+  BODY: 1,
+  FOOD: 2,
+  HEAD: 3
 };
 
-// Directions: [dx, dy]
 const DIRECTIONS = {
   UP: [0, -1],
   DOWN: [0, 1],
@@ -18,245 +12,152 @@ const DIRECTIONS = {
   RIGHT: [1, 0]
 };
 
+const OPPOSITE_DIRECTION = {
+  UP: 'DOWN',
+  DOWN: 'UP',
+  LEFT: 'RIGHT',
+  RIGHT: 'LEFT'
+};
+
+function speedForLevel(level) {
+  return Math.max(70, 200 - ((level - 1) * 15));
+}
+
 export class Game {
-  constructor(mapData, state = null) {
-    this.width = mapData.width;
-    this.height = mapData.height;
-    this.layout = JSON.parse(JSON.stringify(mapData.layout)); // Deep copy to modify
+  constructor(boardConfig, state = null) {
+    this.width = boardConfig.width;
+    this.height = boardConfig.height;
 
     if (state) {
       this.state = state;
-      // Restore map state (dots eaten etc) if provided
-      if (this.state.mapState) {
-        this.layout = this.state.mapState;
-      }
+      this.ensureStateDefaults();
     } else {
       this.initNewGame();
     }
   }
 
+  ensureStateDefaults() {
+    this.state.score ??= 0;
+    this.state.tick ??= 0;
+    this.state.gameOver ??= false;
+    this.state.win ??= false;
+    this.state.snake ??= [];
+    this.state.dir ??= 'RIGHT';
+    this.state.intendedDir ??= this.state.dir;
+    this.state.food ??= null;
+    this.state.foodsEaten ??= 0;
+    this.state.level ??= 1;
+    this.state.speedMs ??= speedForLevel(this.state.level);
+  }
+
   initNewGame() {
+    const startX = Math.floor(this.width / 2);
+    const startY = Math.floor(this.height / 2);
+
     this.state = {
       score: 0,
-      lives: 3,
       tick: 0,
       gameOver: false,
-      mapState: null,
-      pacman: { x: 1, y: 1, dir: 'RIGHT' }, // Default, will find in map
-      ghosts: [],
+      win: false,
+      snake: [
+        { x: startX, y: startY },
+        { x: startX - 1, y: startY },
+        { x: startX - 2, y: startY }
+      ],
+      dir: 'RIGHT',
       intendedDir: 'RIGHT',
-      powerTicks: 0,
-      dotCount: 0,
-      nextExtraLife: 10000
+      food: null,
+      foodsEaten: 0,
+      level: 1,
+      speedMs: speedForLevel(1)
     };
 
-    // Find start positions
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.layout[y].length; x++) {
-        if (this.layout[y][x] === ENTITY.PACMAN) {
-          this.state.pacman = { x, y, dir: 'RIGHT' };
-          this.state.pacmanStart = { x, y };
-          this.layout[y][x] = ENTITY.EMPTY; // Clear start pos from map
-        } else if (this.layout[y][x] === ENTITY.GHOST) { // Ghost Start
-          this.state.ghosts.push({ x, y, dir: 'LEFT', id: this.state.ghosts.length, startX: x, startY: y });
-          this.layout[y][x] = ENTITY.EMPTY;
-        }
-      }
-    }
-
-    // If no ghosts found (e.g. custom map issues), add defaults
-    if (this.state.ghosts.length === 0) {
-      this.state.ghosts.push({ x: 12, y: 3, dir: 'LEFT', id: 0, startX: 12, startY: 3 });
-      this.state.ghosts.push({ x: 14, y: 3, dir: 'RIGHT', id: 1, startX: 14, startY: 3 });
-    }
-
-    // Count dots
-    this.state.dotCount = 0;
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.layout[y].length; x++) {
-        if (this.layout[y][x] === ENTITY.DOT) {
-          this.state.dotCount++;
-        }
-      }
-    }
+    this.spawnFood();
   }
 
   tick() {
     if (this.state.gameOver) return;
 
     this.state.tick++;
+    this.state.dir = this.state.intendedDir;
 
-    // 1. Move Pacman
-    this.movePacman();
+    const head = this.state.snake[0];
+    const [dx, dy] = DIRECTIONS[this.state.dir];
+    const nextHead = { x: head.x + dx, y: head.y + dy };
 
-    // 2. Move Ghosts
-    this.moveGhosts();
-
-    // 3. Update power mode
-    if (this.state.powerTicks > 0) {
-      this.state.powerTicks--;
+    if (!this.isInsideBoard(nextHead.x, nextHead.y)) {
+      this.state.gameOver = true;
+      this.state.win = false;
+      return;
     }
 
-    // 4. Check Collisions
-    this.checkCollisions();
+    const isGrowing = this.state.food && nextHead.x === this.state.food.x && nextHead.y === this.state.food.y;
+    const bodyToCheck = isGrowing ? this.state.snake : this.state.snake.slice(0, -1);
 
-    // 5. Spawn fruit periodically
-    if (this.state.tick % 500 === 0) {
-      this.spawnFruit();
+    if (bodyToCheck.some(seg => seg.x === nextHead.x && seg.y === nextHead.y)) {
+      this.state.gameOver = true;
+      this.state.win = false;
+      return;
     }
 
-    // 6. Update Map State in state object for persistence
-    this.state.mapState = this.layout;
-  }
+    this.state.snake.unshift(nextHead);
 
-  movePacman() {
-    const { x, y, dir } = this.state.pacman;
-    let moveDir = dir;
+    if (isGrowing) {
+      this.state.score += 10;
+      this.state.foodsEaten++;
+      this.updateDifficulty();
 
-    // Check if intended direction is valid
-    if (this.state.intendedDir !== dir) {
-      const [idx, idy] = DIRECTIONS[this.state.intendedDir];
-      if (this.isValidMove(x + idx, y + idy)) {
-        moveDir = this.state.intendedDir;
-        this.state.pacman.dir = moveDir;
+      if (this.state.snake.length >= this.width * this.height) {
+        this.state.food = null;
+        this.state.gameOver = true;
+        this.state.win = true;
+        return;
       }
+
+      this.spawnFood();
+    } else {
+      this.state.snake.pop();
     }
-
-    const [dx, dy] = DIRECTIONS[moveDir];
-    const nextX = x + dx;
-    const nextY = y + dy;
-
-    // Check bounds and walls
-    if (this.isValidMove(nextX, nextY)) {
-      this.state.pacman.x = nextX;
-      this.state.pacman.y = nextY;
-
-      // Eat Content
-      const cell = this.layout[nextY][nextX];
-      if (cell === ENTITY.DOT) {
-        this.state.score += 10;
-        this.layout[nextY][nextX] = ENTITY.EMPTY;
-        this.state.dotCount--;
-        if (this.state.dotCount <= 0) {
-          this.state.gameOver = true; // Win!
-        }
-      } else if (cell === ENTITY.POWER_PILLET) {
-        this.state.score += 50;
-        this.layout[nextY][nextX] = ENTITY.EMPTY;
-        this.state.powerTicks = 100; // 10 seconds at 200ms/tick
-      } else if (cell === ENTITY.FRUIT) {
-        this.state.score += 100;
-        this.layout[nextY][nextX] = ENTITY.EMPTY;
-      }
-
-      // Check for extra life milestones
-      if (this.state.score >= this.state.nextExtraLife) {
-        this.state.lives++;
-        this.state.nextExtraLife += 10000; // Every 10,000 points
-      }
-    }
-    // If blocked, do nothing (Pac-Man stops)
   }
 
-  moveGhosts() {
-    const px = this.state.pacman.x;
-    const py = this.state.pacman.y;
-
-    this.state.ghosts.forEach(ghost => {
-      const { x, y, dir } = ghost;
-      const [dx, dy] = DIRECTIONS[dir];
-      const nextX = x + dx;
-      const nextY = y + dy;
-
-      // 80% chance to continue, 20% to turn at intersections?
-      // Simple logic: if blocked, must turn.
-      if (this.isValidMove(nextX, nextY) && Math.random() > 0.2) {
-        ghost.x = nextX;
-        ghost.y = nextY;
-      } else {
-        // Choose direction towards Pac-Man
-        const validDirs = Object.keys(DIRECTIONS).filter(d => {
-          const [dx, dy] = DIRECTIONS[d];
-          return this.isValidMove(x + dx, y + dy);
-        });
-
-        if (validDirs.length > 0) {
-          let bestDir = validDirs[0];
-          let minDist = Infinity;
-          validDirs.forEach(d => {
-            const [dx, dy] = DIRECTIONS[d];
-            const nx = x + dx;
-            const ny = y + dy;
-            const dist = Math.abs(nx - px) + Math.abs(ny - py);
-            if (dist < minDist) {
-              minDist = dist;
-              bestDir = d;
-            }
-          });
-          ghost.dir = bestDir;
-          const [ndx, ndy] = DIRECTIONS[bestDir];
-          ghost.x += ndx;
-          ghost.y += ndy;
-        }
-      }
-    });
+  updateDifficulty() {
+    this.state.level = 1 + Math.floor(this.state.foodsEaten / 5);
+    this.state.speedMs = speedForLevel(this.state.level);
   }
 
-  isValidMove(x, y) {
-    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return false;
-    return this.layout[y][x] !== ENTITY.WALL;
+  isInsideBoard(x, y) {
+    return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
-  checkCollisions() {
-    const px = this.state.pacman.x;
-    const py = this.state.pacman.y;
-
-    this.state.ghosts.forEach(ghost => {
-      if (ghost.x === px && ghost.y === py) {
-        if (this.state.powerTicks > 0) {
-          // Eat ghost
-          this.state.score += 200;
-          ghost.x = ghost.startX;
-          ghost.y = ghost.startY;
-          ghost.dir = 'LEFT'; // Reset dir
-        } else {
-          // Lose life
-          this.state.lives--;
-          if (this.state.lives <= 0) {
-            this.state.gameOver = true;
-          } else {
-            // Reset positions
-            this.state.pacman.x = this.state.pacmanStart.x;
-            this.state.pacman.y = this.state.pacmanStart.y;
-            this.state.pacman.dir = 'RIGHT';
-            this.state.ghosts.forEach(g => {
-              g.x = g.startX;
-              g.y = g.startY;
-              g.dir = 'LEFT';
-            });
-          }
-        }
-      }
-    });
-  }
-
-  spawnFruit() {
-    // Find empty spots
+  spawnFood() {
+    const occupied = new Set(this.state.snake.map(seg => `${seg.x},${seg.y}`));
     const emptySpots = [];
+
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        if (this.layout[y][x] === ENTITY.EMPTY) {
+        if (!occupied.has(`${x},${y}`)) {
           emptySpots.push({ x, y });
         }
       }
     }
-    if (emptySpots.length > 0) {
-      const spot = emptySpots[Math.floor(Math.random() * emptySpots.length)];
-      this.layout[spot.y][spot.x] = ENTITY.FRUIT;
+
+    if (emptySpots.length === 0) {
+      this.state.food = null;
+      this.state.gameOver = true;
+      this.state.win = true;
+      return;
     }
+
+    const spot = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+    this.state.food = { x: spot.x, y: spot.y };
   }
 
   setIntendedDir(dir) {
+    if (!DIRECTIONS[dir]) return;
+
+    const isReverse = dir === OPPOSITE_DIRECTION[this.state.dir];
+    if (isReverse && this.state.snake.length > 1) return;
+
     this.state.intendedDir = dir;
   }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pac-Man Contribution Graph</title>
+    <title>Snake Contribution Graph</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,8 +34,8 @@
                 <div class="status-circle"></div>
             </div>
             <h1 class="vcard-names">
-                <span class="p-name vcard-fullname">Pac-Man Bot</span>
-                <span class="p-nickname vcard-username">pacman-engine</span>
+                <span class="p-name vcard-fullname">Snake Bot</span>
+                <span class="p-nickname vcard-username">snake-engine</span>
             </h1>
             <button class="btn btn-block">Edit profile</button>
             <div class="vcard-details">
@@ -61,7 +61,7 @@
                             </svg>
                             <span class="repo-name">retro-game-engine</span>
                         </div>
-                        <p class="pinned-desc">A retro game engine built for GitHub contribution graphs.</p>
+                        <p class="pinned-desc">A Snake game built for GitHub contribution graphs.</p>
                          <div class="pinned-meta">
                             <span class="lang-color" style="background-color: #f1e05a;"></span>
                             <span>JavaScript</span>
@@ -69,9 +69,9 @@
                     </div>
                      <div class="pinned-item">
                          <div class="pinned-header">
-                            <span class="repo-name">pacman-renderer</span>
+                            <span class="repo-name">snake-renderer</span>
                         </div>
-                        <p class="pinned-desc">Renders pixels effectively.</p>
+                        <p class="pinned-desc">Renders snake cells and food.</p>
                     </div>
                 </div>
             </div>
@@ -107,20 +107,21 @@
                         <span>More</span>
                     </div>
                 </div>
-                
             <div class="controls">
                     <button class="btn" id="start-btn">Start Game</button>
                     <button class="btn" id="pause-btn">Pause</button>
                     <button class="btn" id="reset-btn">Reset</button>
                     <span id="score-display">Score: 0</span>
-                     <span id="lives-display">Lives: 3</span>
+                     <span id="length-display">Length: 3</span>
+                     <span id="level-display">Level: 1</span>
+                     <span id="speed-display">Speed: 200ms</span>
                      <span id="high-score-display">High Score: 0</span>
-                     <span id="power-timer-display">Power: 0</span>
+                     <span id="status-display">Status: Ready</span>
                 </div>
 
                 <div class="instructions">
-                    <h3>How to Play Pac-Man</h3>
-                    <p>Use arrow keys to move Pac-Man. Eat all dots (light green) to win. Eat power pellets (medium green) to turn ghosts vulnerable and eat them for bonus points. Avoid ghosts when not powered up!</p>
+                    <h3>How to Play Snake</h3>
+                    <p>Use arrow keys or WASD to move. Eat food to grow and gain score. Every 5 foods increases the level and speed. Avoid walls and your own body.</p>
                 </div>
             </div>
             
